@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRI Report - บริษัทตัวอย่าง</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg:#0c0f1a;--bg2:#141825;--bg3:#1c2133;--card:#1a1f2e;--border:rgba(255,255,255,0.06);
+            --blue:#3b82f6;--cyan:#06b6d4;--purple:#8b5cf6;--pink:#ec4899;--green:#10b981;--emerald:#34d399;
+            --orange:#f59e0b;--amber:#fbbf24;--red:#ef4444;--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+        .bg-grid{position:fixed;top:0;left:0;width:100%;height:100%;background-image:linear-gradient(rgba(59,130,246,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.03) 1px,transparent 1px);background-size:50px 50px;z-index:-2}
+        .bg-glow{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 20% 0%,rgba(59,130,246,0.15) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(139,92,246,0.12) 0%,transparent 50%);z-index:-1}
+        .header{background:rgba(20,24,37,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1.25rem 2rem;position:sticky;top:0;z-index:100}
+        .header-inner{max-width:1500px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+        .logo{display:flex;align-items:center;gap:1rem}
+        .logo-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 8px 32px rgba(59,130,246,0.3)}
+        .logo-text h1{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;font-weight:700;background:linear-gradient(135deg,var(--text),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .logo-text span{font-size:0.8rem;color:var(--text2)}
+        .company-badge{background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.1));border:1px solid rgba(16,185,129,0.3);padding:0.75rem 1.5rem;border-radius:12px}
+        .company-name{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:600;color:var(--emerald)}
+        .company-info{font-size:0.75rem;color:var(--text3)}
+        .main{max-width:1500px;margin:0 auto;padding:2rem}
+        .section{margin-bottom:2rem}
+        .section-title{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:1.25rem;display:flex;align-items:center;gap:0.75rem;padding-bottom:0.75rem;border-bottom:2px solid var(--border)}
+        .section-title::before{content:'';width:4px;height:24px;background:linear-gradient(180deg,var(--blue),var(--purple));border-radius:2px}
+        .card{background:var(--card);border-radius:16px;padding:1.5rem;border:1px solid var(--border)}
+        .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}
+        .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+        @media(max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+        @media(max-width:600px){.grid-4{grid-template-columns:1fr}}
+        .legend-box{background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(59,130,246,0.04));border:1px solid rgba(139,92,246,0.2);border-radius:16px;padding:1.5rem;margin-bottom:2rem}
+        .legend-title{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;color:var(--purple);margin-bottom:1rem}
+        .legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+        @media(max-width:800px){.legend-grid{grid-template-columns:1fr}}
+        .legend-section h4{font-size:0.85rem;color:var(--text2);margin-bottom:0.75rem;font-weight:500}
+        .legend-item{display:flex;align-items:center;gap:0.6rem;padding:0.4rem 0;font-size:0.85rem}
+        .legend-dot{width:12px;height:12px;border-radius:4px;flex-shrink:0}
+        .legend-range{font-family:'Space Grotesk',sans-serif;font-weight:600;min-width:120px}
+        .score-card{background:linear-gradient(135deg,var(--card),rgba(59,130,246,0.08));text-align:center;padding:2rem}
+        .score-label{font-size:0.85rem;color:var(--text2);margin-bottom:0.5rem}
+        .score-value{font-family:'Space Grotesk',sans-serif;font-size:4rem;font-weight:800;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+        .score-max{font-size:1.5rem;color:var(--text3)}
+        .score-pct{font-size:1.1rem;color:var(--cyan);margin-top:0.5rem}
+        .score-level{display:inline-block;padding:0.5rem 1.25rem;border-radius:25px;font-weight:600;margin-top:0.75rem;font-size:0.9rem}
+        .level-yellow{background:rgba(245,158,11,0.2);color:var(--amber)}
+        .level-green{background:rgba(16,185,129,0.2);color:var(--emerald)}
+        .persp-card{position:relative;overflow:hidden}
+        .persp-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+        .persp-card.blue::before{background:linear-gradient(180deg,var(--blue),var(--cyan))}
+        .persp-card.purple::before{background:linear-gradient(180deg,var(--purple),var(--pink))}
+        .persp-card.green::before{background:linear-gradient(180deg,var(--green),var(--emerald))}
+        .persp-card.pink::before{background:linear-gradient(180deg,var(--pink),var(--purple))}
+        .persp-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem}
+        .persp-title{display:flex;align-items:center;gap:0.5rem}
+        .persp-icon{font-size:1.5rem}
+        .persp-name{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600}
+        .persp-score{text-align:right}
+        .persp-score-value{font-family:'Space Grotesk',sans-serif;font-size:1.75rem;font-weight:700}
+        .persp-score-avg{font-size:0.7rem;color:var(--text3)}
+        .persp-gap{font-size:0.75rem;padding:0.2rem 0.5rem;border-radius:4px;font-weight:600;display:inline-block;margin-top:0.25rem}
+        .gap-pos{background:rgba(16,185,129,0.2);color:var(--emerald)}
+        .gap-neg{background:rgba(239,68,68,0.2);color:#f87171}
+        .gap-neu{background:rgba(100,116,139,0.2);color:var(--text2)}
+        .comp-bar{height:8px;background:var(--bg2);border-radius:4px;position:relative;margin-top:0.5rem}
+        .comp-bar-fill{height:100%;border-radius:4px}
+        .comp-bar-marker{position:absolute;top:-2px;height:12px;width:2px;background:var(--text);border-radius:1px}
+        .data-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+        .data-table th{text-align:left;padding:0.75rem;background:var(--bg2);color:var(--text2);font-weight:500;border-bottom:1px solid var(--border)}
+        .data-table td{padding:0.75rem;border-bottom:1px solid var(--border)}
+        .data-table tr:hover{background:rgba(59,130,246,0.05)}
+        .score-badge{display:inline-block;padding:0.2rem 0.6rem;border-radius:4px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:0.8rem}
+        .score-badge.critical{background:rgba(239,68,68,0.2);color:#f87171}
+        .score-badge.warning{background:rgba(245,158,11,0.2);color:var(--amber)}
+        .score-badge.good{background:rgba(16,185,129,0.2);color:var(--emerald)}
+        .urgency-badge{display:inline-flex;align-items:center;gap:0.3rem;padding:0.25rem 0.6rem;border-radius:4px;font-size:0.75rem;font-weight:600}
+        .urgency-badge.critical{background:rgba(239,68,68,0.2);color:#f87171}
+        .urgency-badge.high{background:rgba(249,115,22,0.2);color:#fb923c}
+        .urgency-badge.medium{background:rgba(245,158,11,0.2);color:var(--amber)}
+        .urgency-badge.low{background:rgba(16,185,129,0.2);color:var(--emerald)}
+        .priority-card{position:relative;padding-left:1rem}
+        .priority-card::before{content:'';position:absolute;left:0;top:0;width:4px;height:100%;border-radius:2px}
+        .priority-card.critical::before{background:var(--red)}
+        .priority-card.high::before{background:var(--orange)}
+        .priority-card.medium::before{background:var(--amber)}
+        .priority-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;flex-wrap:wrap;gap:0.5rem}
+        .priority-title{font-weight:600;font-size:0.95rem}
+        .priority-detail{font-size:0.85rem;color:var(--text2);margin-bottom:0.75rem}
+        .priority-solution{background:var(--bg2);border-radius:8px;padding:0.75rem;font-size:0.85rem}
+        .priority-solution-title{color:var(--cyan);font-weight:600;margin-bottom:0.5rem}
+        .priority-solution ul{padding-left:1.25rem;color:var(--text2)}
+        .priority-solution li{margin-bottom:0.25rem}
+        .chart-container{position:relative;height:350px}
+        .consult-box{background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(139,92,246,0.05));border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:1.25rem;margin-top:1rem}
+        .consult-title{font-family:'Space Grotesk',sans-serif;font-weight:600;color:var(--blue);margin-bottom:0.75rem}
+        .consult-list{padding-left:1.25rem;font-size:0.9rem}
+        .consult-list li{margin-bottom:0.5rem}
+    </style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<header class="header">
+    <div class="header-inner">
+        <div class="logo">
+            <div class="logo-icon">📊</div>
+            <div class="logo-text">
+                <h1>Transformation Readiness Index</h1>
+                <span>รายงานผลการประเมินความพร้อมในการปรับเปลี่ยนองค์กร</span>
+            </div>
+        </div>
+        <div class="company-badge">
+            <div class="company-name">บริษัทตัวอย่าง จำกัด</div>
+            <div class="company-info">เกษตรและอุตสาหกรรมอาหาร | รายได้ > 5,000 ล้านบาท | พนักงาน > 1,000 คน</div>
+        </div>
+    </div>
+</header>
+
+<main class="main">
+    <!-- Legend -->
+    <div class="legend-box">
+        <div class="legend-title">📖 หลักเกณฑ์การแปลค่าคะแนน</div>
+        <div class="legend-grid">
+            <div class="legend-section">
+                <h4>🎯 ระดับความพร้อม (คะแนน 1-4)</h4>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--emerald)"></div><span class="legend-range">3.50 - 4.00</span><span>🟢 พร้อมเต็มที่</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div><span class="legend-range">3.00 - 3.49</span><span>🔵 พร้อมดี</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div><span class="legend-range">2.50 - 2.99</span><span>🟡 พร้อมปานกลาง</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div><span class="legend-range">2.00 - 2.49</span><span>🟠 พร้อมน้อย</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><span class="legend-range">1.00 - 1.99</span><span>🔴 ไม่พร้อม</span></div>
+            </div>
+            <div class="legend-section">
+                <h4>📊 การแปลค่า Gap (เทียบค่าเฉลี่ย 207 องค์กร)</h4>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--emerald)"></div><span class="legend-range">≥ +0.50</span><span>🌟 จุดแข็งเด่น - สูงกว่าค่าเฉลี่ยมาก</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div><span class="legend-range">+0.20 ถึง +0.49</span><span>✅ ดีกว่าค่าเฉลี่ย</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--text3)"></div><span class="legend-range">-0.19 ถึง +0.19</span><span>➖ ใกล้เคียงค่าเฉลี่ย</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div><span class="legend-range">-0.50 ถึง -0.20</span><span>⚠️ ควรปรับปรุง</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><span class="legend-range">< -0.50</span><span>🚨 เร่งปรับปรุง</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Executive Summary -->
+    <div class="section">
+        <h2 class="section-title">📋 สรุปผลการประเมินภาพรวม</h2>
+        <div class="grid-2" style="grid-template-columns:300px 1fr;">
+            <div class="card score-card">
+                <div class="score-label">คะแนน TRI รวม</div>
+                <div class="score-value">3.06<span class="score-max">/4.00</span></div>
+                <div class="score-pct">คิดเป็น 76.5%</div>
+                <div class="score-level level-green">🔵 พร้อมดี</div>
+                <div style="margin-top:1rem;font-size:0.85rem;color:var(--text2);text-align:left;">
+                    <b>สูงกว่าค่าเฉลี่ย 207 องค์กร (+0.17)</b><br>
+                    องค์กรมีความพร้อมในระดับดี โดยเฉพาะด้าน Business Strategy แต่ต้องเร่งพัฒนาด้าน People
+                </div>
+            </div>
+            <div class="card">
+                <div style="font-family:'Space Grotesk';font-weight:600;margin-bottom:1rem;">เปรียบเทียบ 4 มิติ กับค่าเฉลี่ย 207 องค์กร</div>
+                <div class="grid-4">
+                    <div class="persp-card card blue">
+                        <div class="persp-header">
+                            <div class="persp-title"><span class="persp-icon">📈</span><span class="persp-name">Business</span></div>
+                            <div class="persp-score">
+                                <div class="persp-score-value" style="color:var(--emerald)">3.60</div>
+                                <div class="persp-score-avg">เฉลี่ย 2.98</div>
+                                <div class="persp-gap gap-pos">+0.62 🌟</div>
+                            </div>
+                        </div>
+                        <div class="comp-bar"><div class="comp-bar-fill" style="width:90%;background:linear-gradient(90deg,var(--green),var(--emerald))"></div><div class="comp-bar-marker" style="left:74.5%"></div></div>
+                    </div>
+                    <div class="persp-card card purple">
+                        <div class="persp-header">
+                            <div class="persp-title"><span class="persp-icon">💻</span><span class="persp-name">Technology</span></div>
+                            <div class="persp-score">
+                                <div class="persp-score-value" style="color:var(--amber)">2.90</div>
+                                <div class="persp-score-avg">เฉลี่ย 2.93</div>
+                                <div class="persp-gap gap-neu">-0.03</div>
+                            </div>
+                        </div>
+                        <div class="comp-bar"><div class="comp-bar-fill" style="width:72.5%;background:linear-gradient(90deg,var(--amber),var(--orange))"></div><div class="comp-bar-marker" style="left:73.25%"></div></div>
+                    </div>
+                    <div class="persp-card card green">
+                        <div class="persp-header">
+                            <div class="persp-title"><span class="persp-icon">👥</span><span class="persp-name">People</span></div>
+                            <div class="persp-score">
+                                <div class="persp-score-value" style="color:#f87171">2.65</div>
+                                <div class="persp-score-avg">เฉลี่ย 2.75</div>
+                                <div class="persp-gap gap-neu">-0.10</div>
+                            </div>
+                        </div>
+                        <div class="comp-bar"><div class="comp-bar-fill" style="width:66.25%;background:linear-gradient(90deg,var(--red),var(--orange))"></div><div class="comp-bar-marker" style="left:68.75%"></div></div>
+                    </div>
+                    <div class="persp-card card pink">
+                        <div class="persp-header">
+                            <div class="persp-title"><span class="persp-icon">🌟</span><span class="persp-name">Culture</span></div>
+                            <div class="persp-score">
+                                <div class="persp-score-value" style="color:var(--cyan)">3.08</div>
+                                <div class="persp-score-avg">เฉลี่ย 2.94</div>
+                                <div class="persp-gap gap-pos">+0.14</div>
+                            </div>
+                        </div>
+                        <div class="comp-bar"><div class="comp-bar-fill" style="width:77%;background:linear-gradient(90deg,var(--cyan),var(--blue))"></div><div class="comp-bar-marker" style="left:73.5%"></div></div>
+                    </div>
+                </div>
+                <div style="font-size:0.7rem;color:var(--text3);margin-top:0.75rem;">🔵 แท่ง = บริษัทของท่าน | ⬜ เส้นขาว = ค่าเฉลี่ย 207 องค์กร</div>
+            </div>
+        </div>
+    </div>
+    <!-- Priority Issues -->
+    <div class="section">
+        <h2 class="section-title">🚨 ประเด็นเร่งด่วนที่ต้องพัฒนา (People - ต่ำที่สุด)</h2>
+        <div class="grid-2">
+            <div class="card priority-card critical">
+                <div class="priority-header">
+                    <div class="priority-title">1. Organizational Capability (ขีดความสามารถองค์กร)</div>
+                    <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <span class="score-badge critical">2.00</span>
+                        <span class="urgency-badge critical">🚨 วิกฤต (-0.72)</span>
+                    </div>
+                </div>
+                <div class="priority-detail">
+                    <b>ปัญหา:</b> คะแนน 2.00 ต่ำกว่าค่าเฉลี่ย 207 องค์กร (2.72) ถึง -0.72<br>
+                    • ทักษะพนักงาน (2.00 vs 2.65): Gap -0.65<br>
+                    • แผนพัฒนาทักษะ (2.00 vs 2.82): Gap -0.82<br>
+                    • Succession Plan (2.00 vs 2.69): Gap -0.69
+                </div>
+                <div class="priority-solution">
+                    <div class="priority-solution-title">💡 Solutions ที่ต้องดำเนินการ</div>
+                    <ul>
+                        <li><b>เร่งด่วน:</b> จัดทำ Skills Gap Analysis เพื่อระบุทักษะที่ขาด</li>
+                        <li>ออกแบบ Learning & Development Roadmap ที่สอดคล้องกับกลยุทธ์</li>
+                        <li>จัดทำ Critical Role Mapping และ Succession Plan</li>
+                        <li>สร้าง Internal Academy / Capability Building Program</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card priority-card critical">
+                <div class="priority-header">
+                    <div class="priority-title">2. Change Readiness (ความพร้อมต่อการเปลี่ยนแปลง)</div>
+                    <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <span class="score-badge critical">2.25</span>
+                        <span class="urgency-badge critical">🚨 วิกฤต (-0.41)</span>
+                    </div>
+                </div>
+                <div class="priority-detail">
+                    <b>ปัญหา:</b> คะแนน 2.25 ต่ำกว่าค่าเฉลี่ย 207 องค์กร (2.66) ถึง -0.41<br>
+                    • ทัศนคติพนักงาน (2.00 vs 2.71): Gap -0.71<br>
+                    • Change Agent (2.00 vs 2.56): Gap -0.56<br>
+                    • Change Management System (2.00 vs 2.64): Gap -0.64
+                </div>
+                <div class="priority-solution">
+                    <div class="priority-solution-title">💡 Solutions ที่ต้องดำเนินการ</div>
+                    <ul>
+                        <li><b>เร่งด่วน:</b> แต่งตั้ง Change Agent / Agile Team ในแต่ละหน่วยงาน</li>
+                        <li>จัดอบรม Change Agent Certification Program</li>
+                        <li>นำ Change Management Framework (ADKAR) มาใช้</li>
+                        <li>จัดทำ Change Readiness Assessment ก่อนเริ่มโครงการ</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card priority-card high">
+                <div class="priority-header">
+                    <div class="priority-title">3. IT Infrastructure (โครงสร้างพื้นฐาน IT)</div>
+                    <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <span class="score-badge warning">2.50</span>
+                        <span class="urgency-badge high">⚠️ สูง (-0.36)</span>
+                    </div>
+                </div>
+                <div class="priority-detail">
+                    <b>ปัญหา:</b> คะแนน 2.50 ต่ำกว่าค่าเฉลี่ย 207 องค์กร (2.86) ถึง -0.36<br>
+                    • ระบบ IT ไม่สอดคล้องกับกลยุทธ์ (2.00 vs 2.86): Gap -0.86
+                </div>
+                <div class="priority-solution">
+                    <div class="priority-solution-title">💡 Solutions ที่ต้องดำเนินการ</div>
+                    <ul>
+                        <li>ทบทวน IT Strategy ให้สอดคล้องกับ Business Strategy</li>
+                        <li>พิจารณา Cloud Migration / IT Modernization</li>
+                        <li>จัดทำ IT Roadmap ที่รองรับการเติบโต</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card priority-card medium">
+                <div class="priority-header">
+                    <div class="priority-title">4. Data Management (การจัดการข้อมูล)</div>
+                    <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <span class="score-badge warning">3.00</span>
+                        <span class="urgency-badge medium">📌 ปานกลาง (-0.03)</span>
+                    </div>
+                </div>
+                <div class="priority-detail">
+                    <b>สถานะ:</b> คะแนน 3.00 ใกล้เคียงค่าเฉลี่ย 207 องค์กร (3.03)<br>
+                    แต่ Data Governance ยังต่ำกว่าค่าเฉลี่ย (-0.19)
+                </div>
+                <div class="priority-solution">
+                    <div class="priority-solution-title">💡 Solutions ที่แนะนำ</div>
+                    <ul>
+                        <li>เสริม Data Governance Framework</li>
+                        <li>พัฒนา Data Quality Management Process</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Analysis -->
+    <div class="section">
+        <h2 class="section-title">📊 วิเคราะห์รายละเอียดแต่ละมิติ</h2>
+        
+        <!-- PEOPLE - Most Critical -->
+        <div class="card" style="margin-bottom:1.5rem;border-left:4px solid var(--red);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:1rem;">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <span style="font-size:2rem;">👥</span>
+                    <div>
+                        <div style="font-family:'Space Grotesk';font-size:1.15rem;font-weight:700;">People & Leadership (พนักงานและภาวะผู้นำ) 🚨</div>
+                        <div style="font-size:0.85rem;color:var(--text2);">ต้องเร่งพัฒนามากที่สุด - ต่ำกว่าค่าเฉลี่ย</div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-family:'Space Grotesk';font-size:2.25rem;font-weight:800;color:#f87171;">2.65</div>
+                    <div style="font-size:0.8rem;color:var(--text3);">เฉลี่ย 2.75 | Gap -0.10</div>
+                </div>
+            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr><th>หมวดย่อย</th><th>บริษัท</th><th>เฉลี่ย</th><th>Gap</th><th>ความเร่งด่วน</th><th>Solutions</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><b>Organizational Capability</b></td>
+                        <td><span class="score-badge critical">2.00</span></td>
+                        <td>2.72</td>
+                        <td><span class="score-badge critical">-0.72</span></td>
+                        <td><span class="urgency-badge critical">🚨 วิกฤต</span></td>
+                        <td style="font-size:0.8rem;">Skills Gap Analysis, Learning Roadmap, Succession Plan</td>
+                    </tr>
+                    <tr>
+                        <td><b>Change Readiness</b></td>
+                        <td><span class="score-badge critical">2.25</span></td>
+                        <td>2.66</td>
+                        <td><span class="score-badge critical">-0.41</span></td>
+                        <td><span class="urgency-badge critical">🚨 วิกฤต</span></td>
+                        <td style="font-size:0.8rem;">Change Agent Program, ADKAR Framework</td>
+                    </tr>
+                    <tr>
+                        <td><b>Leadership Readiness</b></td>
+                        <td><span class="score-badge good">3.00</span></td>
+                        <td>2.95</td>
+                        <td><span class="score-badge good">+0.05</span></td>
+                        <td><span class="urgency-badge low">✅ ต่ำ</span></td>
+                        <td style="font-size:0.8rem;">รักษาระดับ</td>
+                    </tr>
+                    <tr>
+                        <td><b>Communication</b></td>
+                        <td><span class="score-badge good">3.00</span></td>
+                        <td>2.70</td>
+                        <td><span class="score-badge good">+0.30</span></td>
+                        <td><span class="urgency-badge low">✅ ต่ำ</span></td>
+                        <td style="font-size:0.8rem;">จุดแข็ง - ใช้เป็น Leverage</td>
+                    </tr>
+                    <tr>
+                        <td><b>Employee Engagement</b></td>
+                        <td><span class="score-badge good">3.00</span></td>
+                        <td>2.76</td>
+                        <td><span class="score-badge good">+0.24</span></td>
+                        <td><span class="urgency-badge low">✅ ต่ำ</span></td>
+                        <td style="font-size:0.8rem;">จุดแข็ง - ต่อยอด</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- BUSINESS - Strongest -->
+        <div class="card" style="margin-bottom:1.5rem;border-left:4px solid var(--emerald);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:1rem;">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <span style="font-size:2rem;">📈</span>
+                    <div>
+                        <div style="font-family:'Space Grotesk';font-size:1.15rem;font-weight:700;">Business Strategy (กลยุทธ์ธุรกิจ) 🌟</div>
+                        <div style="font-size:0.85rem;color:var(--emerald);">จุดแข็งเด่น - สูงกว่าค่าเฉลี่ยอย่างมีนัยสำคัญ</div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-family:'Space Grotesk';font-size:2.25rem;font-weight:800;color:var(--emerald);">3.60</div>
+                    <div style="font-size:0.8rem;color:var(--text3);">เฉลี่ย 2.98 | Gap +0.62 🌟</div>
+                </div>
+            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr><th>หมวดย่อย</th><th>บริษัท</th><th>เฉลี่ย</th><th>Gap</th><th>สถานะ</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><b>Management Support</b></td><td><span class="score-badge good">4.00</span></td><td>3.12</td><td><span class="score-badge good">+0.88</span></td><td>🌟 จุดแข็งเด่น</td></tr>
+                    <tr><td><b>Vision & Clarity</b></td><td><span class="score-badge good">3.67</span></td><td>3.09</td><td><span class="score-badge good">+0.57</span></td><td>🌟 จุดแข็งเด่น</td></tr>
+                    <tr><td><b>Market Insight</b></td><td><span class="score-badge good">3.67</span></td><td>2.95</td><td><span class="score-badge good">+0.72</span></td><td>🌟 จุดแข็งเด่น</td></tr>
+                    <tr><td><b>Change Planning</b></td><td><span class="score-badge good">3.67</span></td><td>2.83</td><td><span class="score-badge good">+0.83</span></td><td>🌟 จุดแข็งเด่น</td></tr>
+                    <tr><td><b>Strategic Agility</b></td><td><span class="score-badge good">3.00</span></td><td>2.90</td><td><span class="score-badge good">+0.10</span></td><td>✅ ดีกว่าเฉลี่ย</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TECHNOLOGY -->
+        <div class="card" style="margin-bottom:1.5rem;border-left:4px solid var(--purple);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:1rem;">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <span style="font-size:2rem;">💻</span>
+                    <div>
+                        <div style="font-family:'Space Grotesk';font-size:1.15rem;font-weight:700;">Technology (เทคโนโลยี)</div>
+                        <div style="font-size:0.85rem;color:var(--text2);">ใกล้เคียงค่าเฉลี่ย แต่มีบางจุดต้องปรับปรุง</div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-family:'Space Grotesk';font-size:2.25rem;font-weight:800;color:var(--amber);">2.90</div>
+                    <div style="font-size:0.8rem;color:var(--text3);">เฉลี่ย 2.93 | Gap -0.03</div>
+                </div>
+            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr><th>หมวดย่อย</th><th>บริษัท</th><th>เฉลี่ย</th><th>Gap</th><th>ความเร่งด่วน</th><th>Solutions</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><b>IT Infrastructure</b></td>
+                        <td><span class="score-badge warning">2.50</span></td>
+                        <td>2.86</td>
+                        <td><span class="score-badge critical">-0.36</span></td>
+                        <td><span class="urgency-badge high">⚠️ สูง</span></td>
+                        <td style="font-size:0.8rem;">IT Strategy Review, Cloud Migration</td>
+                    </tr>
+                    <tr>
+                        <td><b>Digital Tools</b></td>
+                        <td><span class="score-badge good">3.00</span></td>
+                        <td>2.85</td>
+                        <td><span class="score-badge good">+0.15</span></td>
+                        <td><span class="urgency-badge low">✅ ต่ำ</span></td>
+                        <td style="font-size:0.8rem;">รักษาระดับ</td>
+                    </tr>
+                    <tr>
+                        <td><b>Data Management</b></td>
+                        <td><span class="score-badge good">3.00</span></td>
+                        <td>3.03</td>
+                        <td><span class="score-badge warning">-0.03</span></td>
+                        <td><span class="urgency-badge medium">📌 ปานกลาง</span></td>
+                        <td style="font-size:0.8rem;">Data Governance Enhancement</td>
+                    </tr>
+                    <tr>
+                        <td><b>Tech Integration</b></td>
+                        <td><span class="score-badge good">3.00</span></td>
+                        <td>3.02</td>
+                        <td><span class="score-badge warning">-0.02</span></td>
+                        <td><span class="urgency-badge low">✅ ต่ำ</span></td>
+                        <td style="font-size:0.8rem;">รักษาระดับ</td>
+                    </tr>
+                    <tr>
+                        <td><b>Tech Alignment</b></td>
+                        <td><span class="score-badge good">3.00</span></td>
+                        <td>2.87</td>
+                        <td><span class="score-badge good">+0.13</span></td>
+                        <td><span class="urgency-badge low">✅ ต่ำ</span></td>
+                        <td style="font-size:0.8rem;">รักษาระดับ</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- CULTURE -->
+        <div class="card" style="margin-bottom:1.5rem;border-left:4px solid var(--pink);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:1rem;">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <span style="font-size:2rem;">🌟</span>
+                    <div>
+                        <div style="font-family:'Space Grotesk';font-size:1.15rem;font-weight:700;">Culture (วัฒนธรรมองค์กร) ✅</div>
+                        <div style="font-size:0.85rem;color:var(--cyan);">ดีกว่าค่าเฉลี่ย</div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-family:'Space Grotesk';font-size:2.25rem;font-weight:800;color:var(--cyan);">3.08</div>
+                    <div style="font-size:0.8rem;color:var(--text3);">เฉลี่ย 2.94 | Gap +0.14</div>
+                </div>
+            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr><th>หมวดย่อย</th><th>บริษัท</th><th>เฉลี่ย</th><th>Gap</th><th>สถานะ</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><b>Open Mindset</b></td><td><span class="score-badge good">3.25</span></td><td>2.88</td><td><span class="score-badge good">+0.37</span></td><td>✅ ดีกว่าเฉลี่ย</td></tr>
+                    <tr><td><b>Trust & Collaboration</b></td><td><span class="score-badge good">3.00</span></td><td>2.98</td><td><span class="score-badge good">+0.02</span></td><td>➖ ใกล้เคียง</td></tr>
+                    <tr><td><b>Learning Culture</b></td><td><span class="score-badge good">3.00</span></td><td>2.97</td><td><span class="score-badge good">+0.03</span></td><td>➖ ใกล้เคียง</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Consulting Recommendations -->
+    <div class="section">
+        <h2 class="section-title">🎯 ข้อเสนอแนะสำหรับการให้คำปรึกษา</h2>
+        
+        <div class="consult-box" style="border-color:rgba(239,68,68,0.3);background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.02));">
+            <div class="consult-title" style="color:#f87171;">🚨 Priority 1: People Capability & Change Readiness (ดำเนินการทันที)</div>
+            <div class="grid-2">
+                <div>
+                    <div style="font-weight:600;margin-bottom:0.5rem;">Phase 1 (เดือน 1-3): Organizational Capability</div>
+                    <ul class="consult-list">
+                        <li>จัดทำ Skills Gap Analysis ทั้งองค์กร</li>
+                        <li>ออกแบบ Learning & Development Roadmap</li>
+                        <li>จัดทำ Critical Role Mapping</li>
+                        <li>สร้าง Succession Planning Framework</li>
+                        <li>จัดอบรม Core Skills ที่จำเป็น</li>
+                    </ul>
+                </div>
+                <div>
+                    <div style="font-weight:600;margin-bottom:0.5rem;">Phase 2 (เดือน 2-4): Change Readiness</div>
+                    <ul class="consult-list">
+                        <li>แต่งตั้ง Change Agent ในแต่ละหน่วยงาน</li>
+                        <li>จัดอบรม Change Agent Certification</li>
+                        <li>นำ ADKAR Framework มาประยุกต์ใช้</li>
+                        <li>สร้าง Change Governance Structure</li>
+                        <li>จัดทำ Change Impact Assessment</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="consult-box" style="margin-top:1rem;border-color:rgba(249,115,22,0.3);background:linear-gradient(135deg,rgba(249,115,22,0.1),rgba(249,115,22,0.02));">
+            <div class="consult-title" style="color:#fb923c;">⚠️ Priority 2: IT Infrastructure (ดำเนินการภายใน 6 เดือน)</div>
+            <ul class="consult-list">
+                <li>ทบทวน IT Strategy ให้สอดคล้องกับ Business Strategy</li>
+                <li>จัดทำ IT Modernization Roadmap</li>
+                <li>พิจารณา Cloud Migration Strategy</li>
+                <li>ปรับปรุง IT Governance</li>
+            </ul>
+        </div>
+        
+        <div class="consult-box" style="margin-top:1rem;">
+            <div class="consult-title">✅ Leverage จุดแข็ง: Business Strategy & Culture</div>
+            <ul class="consult-list">
+                <li>ใช้ Management Support ที่แข็งแกร่ง (4.00) เป็นตัวผลักดัน Transformation</li>
+                <li>ใช้ Vision & Clarity ที่ดี (3.67) สื่อสาร Why ของการเปลี่ยนแปลงให้พนักงานเข้าใจ</li>
+                <li>ต่อยอด Communication ที่ดี (3.00 vs 2.70) ในการสื่อสารการเปลี่ยนแปลง</li>
+                <li>ใช้ Open Mindset ที่ดี (3.25) ในการขับเคลื่อน Innovation</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="section">
+        <h2 class="section-title">📋 สรุปผลการประเมินและแผนดำเนินการ</h2>
+        <div class="grid-2">
+            <div class="card" style="background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.02));border:1px solid rgba(16,185,129,0.2);">
+                <div style="font-family:'Space Grotesk';font-weight:600;color:var(--emerald);margin-bottom:1rem;">✅ จุดแข็งที่ควรรักษาและต่อยอด</div>
+                <table class="data-table" style="background:transparent;">
+                    <tbody>
+                        <tr><td><b>Management Support</b></td><td><span class="score-badge good">4.00</span></td><td>Gap +0.88 🌟</td></tr>
+                        <tr><td><b>Change Planning</b></td><td><span class="score-badge good">3.67</span></td><td>Gap +0.83 🌟</td></tr>
+                        <tr><td><b>Market Insight</b></td><td><span class="score-badge good">3.67</span></td><td>Gap +0.72 🌟</td></tr>
+                        <tr><td><b>Vision & Clarity</b></td><td><span class="score-badge good">3.67</span></td><td>Gap +0.57 🌟</td></tr>
+                        <tr><td><b>Open Mindset</b></td><td><span class="score-badge good">3.25</span></td><td>Gap +0.37 ✅</td></tr>
+                        <tr><td><b>Communication</b></td><td><span class="score-badge good">3.00</span></td><td>Gap +0.30 ✅</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card" style="background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.02));border:1px solid rgba(239,68,68,0.2);">
+                <div style="font-family:'Space Grotesk';font-weight:600;color:#f87171;margin-bottom:1rem;">🚨 จุดอ่อนที่ต้องเร่งพัฒนา</div>
+                <table class="data-table" style="background:transparent;">
+                    <tbody>
+                        <tr><td><b>IT Infrastructure</b></td><td><span class="score-badge critical">2.00</span></td><td>Gap -0.86 🚨</td></tr>
+                        <tr><td><b>Skills Development</b></td><td><span class="score-badge critical">2.00</span></td><td>Gap -0.82 🚨</td></tr>
+                        <tr><td><b>Employee Readiness</b></td><td><span class="score-badge critical">2.00</span></td><td>Gap -0.71 🚨</td></tr>
+                        <tr><td><b>Critical Role/Succession</b></td><td><span class="score-badge critical">2.00</span></td><td>Gap -0.69 🚨</td></tr>
+                        <tr><td><b>Employee Skills</b></td><td><span class="score-badge critical">2.00</span></td><td>Gap -0.65 🚨</td></tr>
+                        <tr><td><b>Change Management</b></td><td><span class="score-badge critical">2.00</span></td><td>Gap -0.64 🚨</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top:1.5rem;background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(139,92,246,0.05));border:1px solid rgba(59,130,246,0.2);">
+            <div style="font-family:'Space Grotesk';font-weight:600;color:var(--blue);margin-bottom:1rem;">📅 แผนดำเนินการ (Transformation Roadmap)</div>
+            <div class="grid-4" style="gap:1rem;">
+                <div style="background:var(--bg2);border-radius:8px;padding:1rem;border-left:3px solid var(--red);">
+                    <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.5rem;">Q1: Foundation</div>
+                    <div style="font-size:0.8rem;color:var(--text2);">
+                        • Skills Gap Analysis<br>
+                        • Change Agent Selection<br>
+                        • IT Strategy Review
+                    </div>
+                </div>
+                <div style="background:var(--bg2);border-radius:8px;padding:1rem;border-left:3px solid var(--orange);">
+                    <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.5rem;">Q2: Build</div>
+                    <div style="font-size:0.8rem;color:var(--text2);">
+                        • L&D Roadmap<br>
+                        • Change Agent Training<br>
+                        • Succession Planning
+                    </div>
+                </div>
+                <div style="background:var(--bg2);border-radius:8px;padding:1rem;border-left:3px solid var(--amber);">
+                    <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.5rem;">Q3: Execute</div>
+                    <div style="font-size:0.8rem;color:var(--text2);">
+                        • Upskilling Program<br>
+                        • Change Framework<br>
+                        • IT Modernization
+                    </div>
+                </div>
+                <div style="background:var(--bg2);border-radius:8px;padding:1rem;border-left:3px solid var(--green);">
+                    <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.5rem;">Q4: Sustain</div>
+                    <div style="font-size:0.8rem;color:var(--text2);">
+                        • Monitor & Adjust<br>
+                        • Measure Impact<br>
+                        • Continuous Improvement
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+// No charts needed for this version - all data is in tables
+</script>
+</body>
+</html>
